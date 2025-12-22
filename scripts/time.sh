@@ -1,0 +1,248 @@
+
+model_name=VMD_KAN
+batch_size=128
+learning_rate=0.0001
+train_epoch=20
+d_model=128
+
+python -u run.py \
+    --task_name long_term_forecast \
+    --is_training 1 \
+    --root_path ./dataset/ \
+    --data_path ETTm1.csv \
+    --model_id ETTm1_96_96 \
+    --model $model_name \
+    --data ETTm1 \
+    --features M \
+    --seq_len 96 \
+    --label_len 48 \
+    --pred_len 96 \
+    --e_layers 1 \
+    --d_layers 1 \
+    --factor 3 \
+    --enc_in 7 \
+    --dec_in 7 \
+    --c_out 7 \
+    --des 'Exp' \
+    --itr 1 \
+    --revin 1 \
+    --d_model "$d_model" \
+    --batch_size "$batch_size" \
+    --learning_rate "$learning_rate" \
+    --lradj 'type3' \
+    --train_epochs "$train_epoch" \
+    --dropout 0.1 \
+    --e_layers 2 \
+    --vmd_scales 3 \
+    --vmd_alpha 1000 \
+    --vmd_tau 0.2 \
+    --vmd_dc 0 \
+    --vmd_tol 1e-8 \
+    --vmd_n_iter 500 \
+    --vmd_init uniform \
+    --vmd_chunk_size 8 \
+    --feature_selection_threshold 0.001 \
+    --lasso_max_iter 100 \
+    --lasso_alpha 0.0001 \
+    --lasso_lr 0.01 \
+    --kan_grid_size 8 \
+    --kan_spline_order 3 \
+    --kan_base_activation gelu \
+    --kan_enable_bias \
+    --kan_use_residual \
+    --kan_use_layer_norm \
+    --kan_hidden_dim 128 \
+    --kan_dropout 0.3 \
+    --use_dynamic_pruning \
+    --dst_initial_sparsity 0.0 \
+    --dst_target_sparsity 0.3 \
+    --dst_schedule cosine \
+    --dst_update_frequency 500 \
+    --dst_total_steps 2000 \
+    --num_workers 4 \
+    --patience 10 \
+    --use_amp \
+
+
+python -u run.py \
+    --task_name long_term_forecast \
+    --is_training 1 \
+    --root_path ./dataset/ \
+    --data_path ETTm1.csv \
+    --model_id ETTh=m1_96_192 \
+    --model $model_name \
+    --data ETTm1 \
+    --features M \
+    --seq_len 96 \
+    --label_len 48 \
+    --pred_len 192 \
+    --e_layers 2 \
+    --d_layers 1 \
+    --factor 3 \
+    --enc_in 7 \
+    --dec_in 7 \
+    --c_out 7 \
+    --des 'Exp' \
+    --itr 1 \
+    --revin 1 \
+    --d_model "$d_model" \
+    --batch_size "$batch_size" \
+    --learning_rate "$learning_rate" \
+    --lradj 'type3' \
+    --train_epochs "$train_epoch" \
+    --dropout 0.1 \
+    --e_layers 2 \
+    --vmd_scales 3 \
+    --vmd_alpha 1000 \
+    --vmd_tau 0.2 \
+    --vmd_dc 0 \
+    --vmd_tol 1e-8 \
+    --vmd_n_iter 500 \
+    --vmd_init uniform \
+    --vmd_chunk_size 8 \
+    --feature_selection_threshold 0.001 \
+    --lasso_max_iter 100 \
+    --lasso_alpha 0.0001 \
+    --lasso_lr 0.01 \
+    --min_selected_features 2 \
+    --max_selected_features 4 \
+    --kan_grid_size 8 \
+    --kan_spline_order 3 \
+    --kan_base_activation gelu \
+    --kan_enable_bias \
+    --kan_use_residual \
+    --kan_use_layer_norm \
+    --kan_hidden_dim 128 \
+    --kan_dropout 0.3 \
+    --use_dynamic_pruning \
+    --dst_initial_sparsity 0.0 \
+    --dst_target_sparsity 0.3 \
+    --dst_schedule cosine \
+    --dst_update_frequency 500 \
+    --dst_total_steps 2000 \
+    --num_workers 4 \
+    --patience 10 \
+    --use_amp \
+
+
+
+python -u run.py \
+    --task_name long_term_forecast \
+    --is_training 1 \
+    --root_path ./dataset/ \
+    --data_path ETTm1.csv \
+    --model_id ETTm1_96_336 \
+    --model $model_name \
+    --data ETTm1 \
+    --features M \
+    --seq_len 96 \
+    --label_len 48 \
+    --pred_len 336 \
+    --e_layers 2 \
+    --d_layers 1 \
+    --factor 3 \
+    --enc_in 7 \
+    --dec_in 7 \
+    --c_out 7 \
+    --des 'Exp' \
+    --itr 1 \
+    --revin 1 \
+    --d_model "$d_model" \
+    --batch_size "$batch_size" \
+    --learning_rate "$learning_rate" \
+    --lradj 'type3' \
+    --train_epochs "$train_epoch" \
+    --dropout 0.1 \
+    --e_layers 2 \
+    --vmd_scales 3 \
+    --vmd_alpha 1000 \
+    --vmd_tau 0.2 \
+    --vmd_dc 0 \
+    --vmd_tol 1e-8 \
+    --vmd_n_iter 500 \
+    --vmd_init uniform \
+    --vmd_chunk_size 8 \
+    --feature_selection_threshold 0.001 \
+    --lasso_max_iter 100 \
+    --lasso_alpha 0.0001 \
+    --lasso_lr 0.01 \
+    --min_selected_features 2 \
+    --max_selected_features 4 \
+    --kan_grid_size 8 \
+    --kan_spline_order 3 \
+    --kan_base_activation gelu \
+    --kan_enable_bias \
+    --kan_use_residual \
+    --kan_use_layer_norm \
+    --kan_hidden_dim 128 \
+    --kan_dropout 0.3 \
+    --use_dynamic_pruning \
+    --dst_initial_sparsity 0.0 \
+    --dst_target_sparsity 0.3 \
+    --dst_schedule cosine \
+    --dst_update_frequency 500 \
+    --dst_total_steps 2000 \
+    --num_workers 4 \
+    --patience 10 \
+    --use_amp \
+
+
+python -u run.py \
+    --task_name long_term_forecast \
+    --is_training 1 \
+    --root_path ./dataset/ \
+    --data_path ETTm1.csv \
+    --model_id ETTh1_96_720 \
+    --model $model_name \
+    --data ETTm1 \
+    --features M \
+    --seq_len 96 \
+    --label_len 48 \
+    --pred_len 720 \
+    --e_layers 2 \
+    --d_layers 1 \
+    --factor 3 \
+    --enc_in 7 \
+    --dec_in 7 \
+    --c_out 7 \
+    --Exp 'exp_main' \
+    --itr 1 \
+    --revin 1 \
+    --d_model "$d_model" \
+    --batch_size "$batch_size" \
+    --learning_rate "$learning_rate" \
+    --lradj 'type3' \
+    --train_epochs "$train_epoch" \
+    --dropout 0.1 \
+    --e_layers 2 \
+    --vmd_scales 3 \
+    --vmd_alpha 1000 \
+    --vmd_tau 0.2 \
+    --vmd_dc 0 \
+    --vmd_tol 1e-8 \
+    --vmd_n_iter 500 \
+    --vmd_init uniform \
+    --vmd_chunk_size 8 \
+    --feature_selection_threshold 0.001 \
+    --lasso_max_iter 100 \
+    --lasso_alpha 0.0001 \
+    --lasso_lr 0.01 \
+    --min_selected_features 2 \
+    --max_selected_features 4 \
+    --kan_grid_size 8 \
+    --kan_spline_order 3 \
+    --kan_base_activation gelu \
+    --kan_enable_bias \
+    --kan_use_residual \
+    --kan_use_layer_norm \
+    --kan_hidden_dim 128 \
+    --kan_dropout 0.3 \
+    --use_dynamic_pruning \
+    --dst_initial_sparsity 0.0 \
+    --dst_target_sparsity 0.3 \
+    --dst_schedule cosine \
+    --dst_update_frequency 500 \
+    --dst_total_steps 2000 \
+    --num_workers 4 \
+    --patience 10 \
+    --use_amp \
