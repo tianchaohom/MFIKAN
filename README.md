@@ -6,6 +6,7 @@ Ensure you have installed Anaconda or Miniconda. Install the necessary dependenc
 
 ```bash
 conda env create -f environment.yml
+
 ## 2. Training
 
 You can train the model on **all datasets** together using the provided script.
