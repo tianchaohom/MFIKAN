@@ -1,26 +1,30 @@
-
+#!/bin/bash
 
 current_time=$(date +"%m%d_%H%M")
 
 seq_len_meta=96
-testname=mytest
+testname=mvmd_kan_experiment
 pred_lens_meta=(96 192 336 720)
-epochs=(30 30 30 30)
-label_len_mata=48
+epochs=(20 20 20 20)
+label_len_meta=48
 lradj='type3'
 
-# === 定义每个数据集的专属参数（使用关联数组）===
 declare -A batch_sizes_per_dataset
 batch_sizes_per_dataset["ETTh1"]=128
 batch_sizes_per_dataset["ETTh2"]=32
 batch_sizes_per_dataset["ETTm1"]=256
 batch_sizes_per_dataset["ETTm2"]=256
-batch_sizes_per_dataset["weather"]=128
-batch_sizes_per_dataset["traffic"]=32
-batch_sizes_per_dataset["electricity"]=64
-batch_sizes_per_dataset["exchange_rate"]=32
+batch_sizes_per_dataset["weather"]=64
+batch_sizes_per_dataset["traffic"]=8
+batch_sizes_per_dataset["electricity"]=8
+batch_sizes_per_dataset["exchange_rate"]=16
 batch_sizes_per_dataset["national_illness"]=32
-batch_sizes_per_dataset["solar"]=128
+batch_sizes_per_dataset["solar"]=8
+batch_sizes_per_dataset["PEMS03"]=8
+batch_sizes_per_dataset["PEMS04"]=8
+batch_sizes_per_dataset["PEMS07"]=8
+batch_sizes_per_dataset["PEMS08"]=8
+
 
 declare -A learning_rates_per_dataset
 learning_rates_per_dataset["ETTh1"]=0.0005
@@ -28,11 +32,15 @@ learning_rates_per_dataset["ETTh2"]=0.0001
 learning_rates_per_dataset["ETTm1"]=0.0001
 learning_rates_per_dataset["ETTm2"]=0.0005
 learning_rates_per_dataset["weather"]=0.0001
-learning_rates_per_dataset["traffic"]=0.001
-learning_rates_per_dataset["electricity"]=0.0005
+learning_rates_per_dataset["traffic"]=0.0001
+learning_rates_per_dataset["electricity"]=0.0001
 learning_rates_per_dataset["exchange_rate"]=0.0001
-learning_rates_per_dataset["national_illness"]=0.0005
-learning_rates_per_dataset["solar"]=0.0001
+learning_rates_per_dataset["national_illness"]=0.001
+learning_rates_per_dataset["solar"]=0.0005
+learning_rates_per_dataset["PEMS03"]=0.0003
+learning_rates_per_dataset["PEMS04"]=0.0003
+learning_rates_per_dataset["PEMS07"]=0.0003
+learning_rates_per_dataset["PEMS08"]=0.0003
 
 declare -A enc_in_per_dataset
 enc_in_per_dataset["ETTh1"]=7
@@ -45,6 +53,10 @@ enc_in_per_dataset["electricity"]=321
 enc_in_per_dataset["exchange_rate"]=8
 enc_in_per_dataset["national_illness"]=7
 enc_in_per_dataset["solar"]=137
+enc_in_per_dataset["PEMS03"]=358
+enc_in_per_dataset["PEMS04"]=307
+enc_in_per_dataset["PEMS07"]=883
+enc_in_per_dataset["PEMS08"]=170
 
 declare -A data_per_dataset
 data_per_dataset["ETTh1"]=ETTh1
@@ -57,6 +69,10 @@ data_per_dataset["electricity"]=custom
 data_per_dataset["exchange_rate"]=custom
 data_per_dataset["national_illness"]=custom
 data_per_dataset["solar"]=Solar
+data_per_dataset["PEMS03"]=PEMS
+data_per_dataset["PEMS04"]=PEMS
+data_per_dataset["PEMS07"]=PEMS
+data_per_dataset["PEMS08"]=PEMS
 
 declare -A data_path_per_dataset
 data_path_per_dataset["ETTh1"]=ETTh1.csv
@@ -69,160 +85,127 @@ data_path_per_dataset["electricity"]=electricity.csv
 data_path_per_dataset["exchange_rate"]=exchange_rate.csv
 data_path_per_dataset["national_illness"]=national_illness.csv
 data_path_per_dataset["solar"]=solar.txt
-
-declare -A d_state_per_dataset
-d_state_per_dataset["ETTh1"]=2
-d_state_per_dataset["ETTh2"]=2
-d_state_per_dataset["ETTm1"]=2
-d_state_per_dataset["ETTm2"]=2
-d_state_per_dataset["weather"]=2
-d_state_per_dataset["traffic"]=32
-d_state_per_dataset["electricity"]=32
-d_state_per_dataset["exchange_rate"]=32
-d_state_per_dataset["national_illness"]=32
-d_state_per_dataset["solar"]=32
+data_path_per_dataset["PEMS03"]=PEMS03.npz
+data_path_per_dataset["PEMS04"]=PEMS04.npz
+data_path_per_dataset["PEMS07"]=PEMS07.npz
+data_path_per_dataset["PEMS08"]=PEMS08.npz
 
 declare -A d_model_per_dataset
-d_model_per_dataset["ETTh1"]=256
-d_model_per_dataset["ETTh2"]=256
+d_model_per_dataset["ETTh1"]=128
+d_model_per_dataset["ETTh2"]=128
 d_model_per_dataset["ETTm1"]=128
 d_model_per_dataset["ETTm2"]=128
-d_model_per_dataset["weather"]=512
-d_model_per_dataset["traffic"]=256
-d_model_per_dataset["electricity"]=256
+d_model_per_dataset["weather"]=256
+d_model_per_dataset["traffic"]=128
+d_model_per_dataset["electricity"]=128
 d_model_per_dataset["exchange_rate"]=128
 d_model_per_dataset["national_illness"]=256
 d_model_per_dataset["solar"]=256
+d_model_per_dataset["PEMS03"]=128
+d_model_per_dataset["PEMS04"]=128
+d_model_per_dataset["PEMS07"]=128
+d_model_per_dataset["PEMS08"]=128
+
 
 datasets=("ETTh1" "ETTh2" "ETTm1" "ETTm2" "weather" "exchange_rate" "national_illness" "electricity" "solar" "traffic")
-#("ETTh1" "ETTh2" "ETTm1" "ETTm2" "weather"  "exchange_rate" "national_illness" "electricity" "solar" "traffic")
-models=("VMD_KAN")
+model_name="VMD_KAN"
 
-# === 为每个模型 + 测试名 + ma_type + 数据集 创建独立目录 ===
-for model_name in "${models[@]}"; do
-    for dataset in "${datasets[@]}"; do
-        log_dir="./logs/$model_name/$testname/$ma_type/$dataset"
-        if [ ! -d "$log_dir" ]; then
-            mkdir -p "$log_dir"
-            echo "Created directory: $log_dir"
-        fi
-    done
-done
-
-# === 主循环 ===
 for dataset in "${datasets[@]}"; do
-    # 获取该数据集的专属参数
     batch_size=${batch_sizes_per_dataset[$dataset]}
     learning_rate=${learning_rates_per_dataset[$dataset]}
     enc_in=${enc_in_per_dataset[$dataset]}
     data=${data_per_dataset[$dataset]}
     data_path=${data_path_per_dataset[$dataset]}
-    d_state=${d_state_per_dataset[$dataset]}
     d_model=${d_model_per_dataset[$dataset]}
-    # solar特殊处理
+    min_selected_features=${min_selected_features_per_dataset[$dataset]}
+    max_selected_features=${max_selected_features_per_dataset[$dataset]}
+    
+    dec_in=$enc_in
+    c_out=$enc_in
+    c_in=$enc_in
+
     if [ "$dataset" = "national_illness" ]; then
         seq_len=36
         pred_lens=(24 36 48 60)
-        strides=(3)
         label_len=18
+    elif [[ "$dataset" =~ ^PEMS ]]; then
+        seq_len=$seq_len_meta
+        pred_lens=(12 24 48 96)
+        label_len=$label_len_meta
     else
         seq_len=$seq_len_meta
         pred_lens=("${pred_lens_meta[@]}")
-        strides=("${strides_meta[@]}")
-        label_len=$label_len_mata
+        label_len=$label_len_meta
     fi
-    for model_name in "${models[@]}"; do
-        for i in "${!pred_lens[@]}"; do
-            for j in "${!patch_lens[@]}"; do
-                for n in "${!strides[@]}"; do
-                    pred_len=${pred_lens[$i]}
-                    train_epoch=${epochs[$i]}
-                    patch_len=${patch_lens[$j]}
-                    stride=${strides[$n]}
 
+    log_dir="./logs/$model_name/$testname/$dataset"
+    mkdir -p "$log_dir"
 
-                    # 日志文件名
-                    log_file="logs/$model_name/$testname/$ma_type/$dataset/${model_name}_${patch_len}_${stride}_${batch_size}_${dataset}_${lradj}_${learning_rate}_${train_epoch}_${seq_len}_${pred_len}_${current_time}.log"
+    for i in "${!pred_lens[@]}"; do
+        pred_len=${pred_lens[$i]}
+        train_epoch=${epochs[$i]}
+        log_file="$log_dir/${model_name}_${dataset}_${seq_len}_${pred_len}_${current_time}.log"
 
-                    echo "Running: $model_name on $dataset with lr=$learning_rate, bs=$batch_size, pred_len=$pred_len"
-                    
-                    python -u run.py \
-                        --Exp exp_main \
-                        --revin 1 \
-                        --is_training 1 \
-                        --root_path ./dataset/ \
-                        --data_path "$data_path" \
-                        --model_id "${dataset}_${pred_len}_${ma_type}" \
-                        --model "$model_name" \
-                        --data "$data" \
-                        --features M \
-                        --seq_len "$seq_len" \
-                        --pred_len "$pred_len" \
-                        --patch_len "$patch_len" \
-                        --d_state "$d_state" \
-                        --d_model "$d_model" \
-                        --stride "$stride" \
-                        --label_len "$label_len" \
-                        --enc_in "$enc_in" \
-                        --des 'Exp' \
-                        --itr 1 \
-                        --batch_size "$batch_size" \
-                        --learning_rate "$learning_rate" \
-                        --lradj "$lradj" \
-                        --train_epochs "$train_epoch" \
-                        --dropout 0.2 \
-                        --e_layers 2 \
-                        --vmd_scales 1 \
-                        --vmd_alpha 1000 \
-                        --vmd_tau 0.2 \
-                        --vmd_dc 0 \
-                        --vmd_tol 1e-8 \
-                        --vmd_n_iter 500 \
-                        --vmd_init uniform \
-                        --vmd_chunk_size 128 \
-                        --feature_selection_threshold 0.001 \
-                        --lasso_max_iter 100 \
-                        --lasso_alpha 0.0001 \
-                        --lasso_lr 0.01 \
-                        --min_selected_features 2 \
-                        --max_selected_features 4 \
-                        --kan_grid_size 8 \
-                        --kan_spline_order 3 \
-                        --kan_base_activation gelu \
-                        --kan_enable_bias \
-                        --kan_use_residual \
-                        --kan_use_layer_norm \
-                        --kan_hidden_dim 128 \
-                        --kan_dropout 0.3 \
-                        --use_dynamic_pruning \
-                        --dst_initial_sparsity 0.0 \
-                        --dst_target_sparsity 0.3 \
-                        --dst_schedule cosine \
-                        --dst_update_frequency 500 \
-                        --dst_total_steps 2000 \
-                        --num_workers 4 \
-                        --patience 10 \
-                        --use_amp \
-                        --affine
-                done
-            done
-        done
+        echo "Running: $model_name on $dataset | lr=$learning_rate, bs=$batch_size, pred_len=$pred_len, min_feat=$min_selected_features, max_feat=$max_selected_features"
+        python -u run.py \
+            --task_name long_term_forecast \
+            --is_training 1 \
+            --root_path ./dataset/ \
+            --data_path "$data_path" \
+            --model_id "${dataset}_${seq_len}_${pred_len}" \
+            --model "$model_name" \
+            --data "$data" \
+            --features M \
+            --seq_len "$seq_len" \
+            --label_len "$label_len" \
+            --pred_len "$pred_len" \
+            --e_layers 2 \
+            --d_layers 1 \
+            --factor 3 \
+            --enc_in "$enc_in" \
+            --dec_in "$dec_in" \
+            --c_in "$c_in" \
+            --c_out "$c_out" \
+            --des 'Exp' \
+            --itr 1 \
+            --revin 1 \
+            --d_model "$d_model" \
+            --batch_size "$batch_size" \
+            --learning_rate "$learning_rate" \
+            --lradj "$lradj" \
+            --train_epochs "$train_epoch" \
+            --dropout 0.1 \
+            --vmd_scales 3 \
+            --vmd_alpha 1000 \
+            --vmd_tau 0.2 \
+            --vmd_dc 0 \
+            --vmd_tol 1e-8 \
+            --vmd_n_iter 500 \
+            --vmd_init uniform \
+            --vmd_chunk_size 8 \
+            --kan_grid_size 8 \
+            --kan_spline_order 3 \
+            --kan_base_activation gelu \
+            --kan_enable_bias \
+            --kan_use_residual \
+            --kan_use_layer_norm \
+            --kan_hidden_dim 128 \
+            --kan_dropout 0.3 \
+            --use_dynamic_pruning \
+            --dst_initial_sparsity 0.0 \
+            --dst_target_sparsity 0.3 \
+            --dst_schedule cosine \
+            --dst_update_frequency 500 \
+            --dst_total_steps 2000 \
+            --num_workers 4 \
+            --patience 10 \
+            --use_amp > "$log_file" 2>&1
     done
 done
 
-for model_name in "${models[@]}"; do
-# === 所有任务执行完毕后，生成并保存表格 ===
 echo "All training tasks are completed. Generating the results table..."
-
-log_base_dir="./logs/$model_name/$testname/$ma_type"
-
-table_log_dir=$(find "$log_base_dir" -maxdepth 1 -type d -print | head -n 1)
-
-# 生成CSV文件的路径
-# 例如：./logs/mymodel/fulltest/ema/results_table.csv
+log_base_dir="./logs/$model_name/$testname"
 output_csv_path="$log_base_dir/${model_name}_results.csv"
 
-python generate_table.py --log_dir "$table_log_dir" --output_csv_path "$output_csv_path"
-
+python generate_table.py --log_dir "$log_base_dir" --output_csv_path "$output_csv_path"
 echo "Results table has been generated and saved."
-done
