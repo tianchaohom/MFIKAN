@@ -3,7 +3,7 @@
 current_time=$(date +"%m%d_%H%M")
 
 seq_len_meta=96
-testname=mvmd_kan_experiment
+testname=MFIKAN_experiment
 pred_lens_meta=(96 192 336 720)
 epochs=(20 20 20 20)
 label_len_meta=48
@@ -108,7 +108,7 @@ d_model_per_dataset["PEMS08"]=128
 
 
 datasets=("ETTh1" "ETTh2" "ETTm1" "ETTm2" "weather" "exchange_rate" "national_illness" "electricity" "solar" "traffic")
-model_name="VMD_KAN"
+model_name="MFIKAN"
 
 for dataset in "${datasets[@]}"; do
     batch_size=${batch_sizes_per_dataset[$dataset]}
