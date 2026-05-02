@@ -9,7 +9,7 @@ from torch import optim
 import os
 import time
 import warnings
-from models import VMD_KAN
+from models import MFIKAN
 import math
 
 warnings.filterwarnings('ignore')
@@ -20,7 +20,7 @@ class Exp_Main(Exp_Basic):
 
     def _build_model(self):
         model_dict = {
-            'VMD_KAN': VMD_KAN,
+            'MFIKAN': MFIKAN,
         }
         model = model_dict[self.args.model].Model(self.args).float()
 
