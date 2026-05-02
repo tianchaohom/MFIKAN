@@ -14,7 +14,7 @@ random.seed(fix_seed)
 torch.manual_seed(fix_seed)
 np.random.seed(fix_seed)
 
-parser = argparse.ArgumentParser(description='MfiKAN')
+parser = argparse.ArgumentParser(description='MFIKAN')
 
 # basic config
 # General parameters
@@ -22,8 +22,8 @@ parser.add_argument('--task_name', type=str, required=True, default='long_term_f
                     help='task name, options:[long_term_forecast, short_term_forecast, imputation, classification, anomaly_detection]')
 parser.add_argument('--is_training', type=int, required=True, default=1, help='status')
 parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
-parser.add_argument('--model', type=str, required=True, default='Autoformer',
-                    help='model name, options: [Autoformer, Transformer, TimesNet, KAN, xPatch]')
+parser.add_argument('--model', type=str, required=True, default='MFIKAN',
+                    help='model name, options: [MFIKAN, Autoformer, Transformer, TimesNet, KAN, xPatch]')
 parser.add_argument('--Exp', type=str, required=False, default='exp_main',
                     help='Exp name, options: [exp_main]')
 parser.add_argument('--train_only', type=bool, required=False, default=False, help='perform training on full input dataset without validation and testing')
@@ -254,7 +254,6 @@ parser.add_argument('--conv_weight', type=float, default=0.05, help='Late-stage 
 parser.add_argument('--decay_k', type=float, default=2.0, help='Attenuation coefficient')
 
 
-#VMDKAN lr parameters
 parser.add_argument('--lr_min', type=float, default=1e-6, help='Proportion of stable period')
 parser.add_argument('--lr_max', type=float, default=1e-3, help='Transition steepness')
 parser.add_argument('--lr_alpha', type=float, default=8.0, help='Transition steepness')
